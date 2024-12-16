@@ -11,6 +11,14 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Docker cleanup
+        run: |
+          echo "Cleaning up unused Docker containers, images, and volumes..."
+          sudo docker container prune -f
+          sudo docker image prune -af
+          sudo docker volume prune -f
+          sudo docker network prune -f
+
       - name: Pull docker image
         run: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/pipeline-email-ai-backend:latest
 
