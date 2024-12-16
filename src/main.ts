@@ -1,7 +1,7 @@
 import express, { Application, NextFunction, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import path from "path";
+
 dotenv.config();
 import cookieParser from "cookie-parser";
 import { clerkMiddleware } from "@clerk/express";
@@ -9,8 +9,7 @@ import { routes } from "./routes/routes";
 
 import http from "http";
 import { setupSocketIO } from "./lib/setupSocketIO";
-import bodyParser from "body-parser";
-import { IRequest } from "./type";
+
 import { validateNotification } from "./routes/webhook";
 const app = express();
 const server = http.createServer(app);
