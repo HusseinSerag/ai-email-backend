@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2018", // JavaScript version to compile to
+    "module": "CommonJS", // Module system for Node.js
+    "rootDir": "./src", // Root directory of TypeScript source files
+    "outDir": "./build", // Output directory for compiled files
+    "strict": true, // Enable strict type-checking options
+    "esModuleInterop": true, // Allow import/export compatibility
+    "skipLibCheck": true // Skip type checking of declaration files
+  },
+  "include": ["src/**/*.ts"], // Include all .ts files in the src folder
+  "exclude": ["node_modules", "build"] // Exclude node_modules and build folders
+}
