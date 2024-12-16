@@ -26,7 +26,7 @@ jobs:
         run: sudo docker rm -f pipeline-email-ai-backend-container || true
 
       - name: Download env file from s3
-        run: aws s3 cp s3://${{ secrets.S3_BUCKETNAME }}/.env .env
+        run: aws s3 cp s3://${{ secrets.S3_BUCKETNAME }}/.env ~/.env; pwd
 
       - name: create common network
         run: sudo docker network create app
