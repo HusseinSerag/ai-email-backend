@@ -26,11 +26,11 @@ jobs:
         run: sudo docker rm -f pipeline-email-ai-backend-container || true
 
       - name: Download env file from s3
-        run: aws s3 cp s3://${{ secrets.S3_BUCKETNAME }}/.env ~/.env; pwd
+        run: aws s3 cp s3://${{ secrets.S3_BUCKETNAME }}/.env .env; pwd
 
       - name: create common network
         run: sudo docker network create app
       - name: start redis container
         run: sudo docker run -d --name redis --network app -p 6379:6379 redis:latest
       - name: Run Docker container
-        run: sudo docker run -d -p 3000:3000 --env-file /.env --network app --name pipeline-email-ai-backend-container ${{ secrets.DOCKER_USERNAME }}/pipeline-email-ai-backend
+        run: sudo docker run -d -p 3000:3000 --env-file .env --network app --name pipeline-email-ai-backend-container ${{ secrets.DOCKER_USERNAME }}/pipeline-email-ai-backend
