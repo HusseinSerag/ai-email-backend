@@ -17,8 +17,8 @@ jobs:
       - name: Delete old docker container
         run: sudo docker rm -f pipeline-email-ai-backend-container || true
 
-      - name: Download env file from s3
-        run: aws s3 cp s3://${{ secrets.S3_BUCKETNAME }}/.env .env
+      #- name: Download env file from s3
+      # run: aws s3 cp s3://${{ secrets.S3_BUCKETNAME }}/.env .env
 
       - name: Run Docker container
         run: sudo docker run -d -p 3000:3000 --name pipeline-email-ai-backend-container ${{ secrets.DOCKER_USERNAME }}/pipeline-email-ai-backend --env-file .env
