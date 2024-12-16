@@ -37,6 +37,6 @@ app.get("/hc", (req: Request, res: Response, next: NextFunction) => {
 
 const PORT: number = Number(process.env.PORT) || 3000;
 routes(app);
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(` Server running on Port: ${PORT}`);
 });
