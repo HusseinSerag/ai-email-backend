@@ -5,6 +5,7 @@ import { getAccountAssociatedWithUser } from "../middleware/getAccountUser";
 import { sendSuccessResponse } from "../lib/sendResponse";
 import { CustomError, HttpStatusCode } from "../lib/customError";
 import { writeFileSync } from "fs";
+import { transformDocument } from "@prisma/client/runtime";
 
 export async function getThreadInformation(
   req: IRequest<{
@@ -36,12 +37,17 @@ export async function getThreadInformation(
             sentAt: true,
             subject: true,
             internetMessageId: true,
+            replyTo: true,
+            references: true,
           },
         },
       },
     });
+
     if (!thread)
       throw new CustomError("Thread doesn't exist", HttpStatusCode.NOT_FOUND);
+    ////
+    console.log("here");
     let lastExternalEmail = thread.emails
       .reverse()
       .find((email) => email.from.address !== account.emailAddress);
@@ -68,6 +74,8 @@ export async function getThreadInformation(
         address: account.emailAddress,
       },
       id: lastExternalEmail.internetMessageId,
+      replyTo: lastExternalEmail.replyTo,
+      references: lastExternalEmail.references,
     };
     sendSuccessResponse(res, valueReturned, HttpStatusCode.OK);
   } catch (e) {

@@ -57,12 +57,18 @@ eventQueue.on("progress", (job) => {
   });
   console.log("In progress ", connectedUsers);
 });
+eventQueue.on("paused", () => {
+  // handle pausing stream
+});
+eventQueue.on("resumed", () => {
+  // handle resume stream
+});
 eventQueue.on("failed", (data) => {
   // connectedUsers.removeJobFromMap(data)
   // sendMessage that is error
   console.log(data);
 });
-const worker = new Worker(
+export const worker = new Worker(
   "email-sync",
   async (job: Job) => {
     log.info("started job");

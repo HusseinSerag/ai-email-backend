@@ -117,7 +117,9 @@ async function upsertEmail(
       .filter(Boolean);
 
     // insert threads
-
+    log.info(
+      `Email inReplyTo: ${email.inReplyTo}, references: ${email.references}, threadId: ${email.threadId}`
+    );
     const thread = await prisma.thread.upsert({
       where: {
         id: email.threadId,
@@ -298,7 +300,6 @@ async function upsertAttachment(
         },
       });
 
-      console.log(emailId, attachment.id);
       const res = await axios.get<{ content: string }>(
         `https://api.aurinko.io/v1/email/messages/${emailId}/attachments/${attachment.id}`,
         {
