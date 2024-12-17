@@ -92,7 +92,7 @@ const worker = new Worker(
         },
       });
 
-      // await syncEmailsToDB(emails, accountId, userId, jobId || "");
+      await syncEmailsToDB(emails, accountId, userId, jobId || "");
       await prisma.account.update({
         where: {
           id: accountId,

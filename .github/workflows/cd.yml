@@ -13,7 +13,12 @@ jobs:
     steps:
       - name: Docker cleanup
         run: |
-          echo "Cleaning up unused Docker containers, images, and volumes..."
+
+          sudo docker container stop pipeline-email-ai-backend-container
+          sudo docker container stop redis 
+          sudo docker container rm pipeline-email-ai-backend-container
+          sudo docker container rm redis
+          sudo docker network rm app 
           sudo docker container prune -f
           sudo docker image prune -af
           sudo docker volume prune -f
