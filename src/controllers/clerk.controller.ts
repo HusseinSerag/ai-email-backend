@@ -30,7 +30,7 @@ export async function handleUserCreationWebhook(
       data: {
         firstName: first_name ?? email_addresses[0].email_address,
         email: email_addresses[0].email_address,
-        lastName: last_name ?? email_addresses[0].email_addres,
+        lastName: last_name ?? email_addresses[0].email_address,
         imageUrl: image_url,
         id: id,
       },
