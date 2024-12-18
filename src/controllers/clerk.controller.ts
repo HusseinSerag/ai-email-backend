@@ -28,9 +28,9 @@ export async function handleUserCreationWebhook(
     const { first_name, last_name, image_url, email_addresses, id } = data;
     await prisma.user.create({
       data: {
-        firstName: first_name,
+        firstName: first_name ?? email_addresses[0].email_address,
         email: email_addresses[0].email_address,
-        lastName: last_name,
+        lastName: last_name ?? email_addresses[0].email_addres,
         imageUrl: image_url,
         id: id,
       },
