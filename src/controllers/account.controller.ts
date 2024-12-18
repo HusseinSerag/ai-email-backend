@@ -258,6 +258,7 @@ export async function generateAIemail(
        or a draft response
        - just output the response
        - the user will provide his/her name, compose the email that this person is sending it
+       - return HTML so that the output be displayed nicely
        `,
           },
         ],
