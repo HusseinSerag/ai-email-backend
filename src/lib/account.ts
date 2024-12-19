@@ -77,7 +77,6 @@ export class Account {
       while (updatedRes.nextPageToken) {
         updatedRes = await this.getEmails({
           pageToken: updatedRes.nextPageToken,
-          deltaToken: storedDeltaToken,
         });
         log.info("getting more emails");
         emails = emails.concat(updatedRes.records);
