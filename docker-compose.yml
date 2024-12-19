@@ -20,7 +20,7 @@ services:
 
   api:
     image: husseinserag/pipeline-email-ai-backend:latest
-    container_name: api
+
     depends_on:
       - redis
       - db
