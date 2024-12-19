@@ -11,18 +11,18 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # - name: Docker cleanup
-      #   run: |
+      - name: Docker cleanup
+        run: |
 
-      #     sudo docker container stop pipeline-email-ai-backend-container
-      #     sudo docker container stop redis
-      #     sudo docker container rm pipeline-email-ai-backend-container
-      #     sudo docker container rm redis
-      #     sudo docker network rm app
-      #     sudo docker container prune -f
-      #     sudo docker image prune -af
-      #     sudo docker volume prune -f
-      #     sudo docker network prune -f
+          sudo docker container stop pipeline-email-ai-backend-container
+          sudo docker container stop redis
+          sudo docker container rm pipeline-email-ai-backend-container
+          sudo docker container rm redis
+          sudo docker network rm app
+          sudo docker container prune -f
+          sudo docker image prune -af
+          sudo docker volume prune -f
+          sudo docker network prune -f
 
       - name: Pull docker image
         run: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/pipeline-email-ai-backend:latest

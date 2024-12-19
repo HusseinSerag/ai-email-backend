@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon ./src/main.ts",
-    "start": "node ./build/main.js",
+    "start": "set NODE_OPTIONS='--max-old-space-size=8192' && node ./build/main.js",
     "push": "prisma db push",
     "studio": "prisma studio",
     "tunnel": "npx untun@latest tunnel http://localhost:3000",
