@@ -23,7 +23,7 @@ log.info(process.env.REDIS_URL);
 eventQueue.on("completed", (job) => {
   const [userId, accountId] = job.returnvalue.split(":");
   // send message that it is completed
-  console.log(connectedUsers);
+
   //connectedUsers.removeJobFromMap(job.returnvalue, job.jobId);
 
   const sockets = connectedUsers.getSocketFromMap(userId);
@@ -55,7 +55,6 @@ eventQueue.on("progress", (job) => {
       accountId,
     });
   });
-  console.log("In progress ", connectedUsers);
 });
 eventQueue.on("paused", () => {
   // handle pausing stream
@@ -66,7 +65,6 @@ eventQueue.on("resumed", () => {
 eventQueue.on("failed", (data) => {
   // connectedUsers.removeJobFromMap(data)
   // sendMessage that is error
-  console.log(data);
 });
 export const worker = new Worker(
   "email-sync",

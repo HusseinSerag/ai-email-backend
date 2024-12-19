@@ -45,7 +45,7 @@ export async function validateNotification(
       .createHmac("sha256", process.env.AURINKO_SIGNING_SECRET!)
       .update(str)
       .digest("hex");
-    console.log(`${expectedSignature}\n${signature}`);
+
     if (expectedSignature !== signature) {
       throw new CustomError("Wrong signature!", HttpStatusCode.BAD_REQUEST);
     }

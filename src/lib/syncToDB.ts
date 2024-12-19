@@ -129,9 +129,7 @@ async function upsertEmail(
       .filter(Boolean);
 
     // insert threads
-    log.info(
-      `Email inReplyTo: ${email.inReplyTo}, references: ${email.references}, threadId: ${email.threadId}`
-    );
+
     const thread = await prisma.thread.upsert({
       where: {
         id: email.threadId,
