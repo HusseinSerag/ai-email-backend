@@ -27,6 +27,7 @@ model Account {
   emailAddress String @unique
   name String
   deltaToken String?
+  oramaIndex Json?
   email_addresses EmailAddress[]
   threads Thread[]
   isSyncedInitially isInitialized @default(start)
