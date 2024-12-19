@@ -11,6 +11,8 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Remove images
+        run: sudo docker image prune -af
       - name: Download env file from s3
         run: aws s3 cp s3://${{ secrets.S3_BUCKETNAME }}/.env /home/ubuntu/.env; pwd
 
