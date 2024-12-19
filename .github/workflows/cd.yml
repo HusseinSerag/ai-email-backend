@@ -17,9 +17,11 @@ jobs:
       - name: navigate to deployment dir
         run: cd /home/ubuntu
 
+      - name: Log in to Docker Hub
+        run: docker login -u "${{ secrets.DOCKER_USERNAME }}" -p ${{ secrets.DOCKER_PASSWORD }}
+
       - name: start docker containers
         run: |
           sudo docker compose down
           sudo docker compose pull
-          sudo docker compose build
           sudo docker compose up
