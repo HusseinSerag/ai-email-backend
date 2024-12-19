@@ -11,6 +11,7 @@ import { StringValidation } from "zod";
 import log from "../lib/logger";
 import { appendFileSync } from "fs";
 import { UploadToS3, getS3Url } from "../lib/s3";
+import { OramaClient } from "../lib/orama";
 
 export async function getAccountsUsers(
   req: IRequest,
@@ -360,6 +361,44 @@ export async function sendEmailAcc(
     });
 
     sendSuccessResponse(res, {}, HttpStatusCode.CREATED);
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function searchThreads(
+  req: IRequest<
+    {
+      id: string;
+    },
+    {},
+    {},
+    {
+      query: string;
+    }
+  >,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { id: accountId } = req.params;
+
+    const { id: userId } = req.user!;
+    const { query } = req.query;
+
+    const account = await getAccountAssociatedWithUser({
+      userId,
+      accountId,
+    });
+
+    const orama = new OramaClient(account.id);
+    await orama.init();
+    const resp = await orama.search({
+      term: query,
+    });
+    let response = resp.hits.map((hit) => hit.document);
+
+    sendSuccessResponse(res, response, HttpStatusCode.CREATED);
   } catch (e) {
     next(e);
   }

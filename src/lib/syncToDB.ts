@@ -6,6 +6,8 @@ import { CustomError, HttpStatusCode } from "./customError";
 import { eventQueue } from "./bullMQ";
 import axios from "axios";
 import { UploadToS3, getS3Url } from "./s3";
+import { OramaClient } from "./orama";
+import { threadId } from "worker_threads";
 
 export async function syncEmailsToDB(
   emails: EmailMessage[],
@@ -15,6 +17,8 @@ export async function syncEmailsToDB(
 ) {
   log.info("Attempting sync emails");
   const limit = p(5);
+  const orama = new OramaClient(accountId);
+  await orama.init();
   try {
     let index = 0;
     if (userId && jobId) {
@@ -35,6 +39,14 @@ export async function syncEmailsToDB(
 
     for (const email of emails) {
       await upsertEmail(email, accountId, index++);
+      await orama.insert({
+        subject: email.subject,
+        body: email.body ?? "",
+        from: email.from.address,
+        to: email.to.map((t) => t.address),
+        sentAt: email.sentAt,
+        threadId: email.threadId,
+      });
       if (jobId && userId) {
         eventQueue.emit(
           "progress",

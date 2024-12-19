@@ -5,6 +5,7 @@ import {
   getSuggestions,
   getThreadCountAccounts,
   getThreadsAccount,
+  searchThreads,
   sendEmailAcc,
 } from "../controllers/account.controller";
 import { requireAuth } from "../middleware/requireAuth";
@@ -20,6 +21,7 @@ router.get("/thread-count/:id", requireAuth, getThreadCountAccounts);
 router.get("/threads/:id", requireAuth, getThreadsAccount);
 router.get("/suggestions/:id", requireAuth, getSuggestions);
 router.get("/thread/:id/:threadId", requireAuth, getThreadInformation);
+router.get("/search/:id", requireAuth, searchThreads);
 router.post(
   "/send/:id",
   requireAuth,
