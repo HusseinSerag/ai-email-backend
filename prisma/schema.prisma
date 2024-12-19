@@ -1,13 +1,15 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "cockroachdb"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url  	    = env("DATABASE_URL")
+ 
 }
-
-
 
 model User {
   id String @id @default(cuid())
@@ -25,7 +27,6 @@ model Account {
   emailAddress String @unique
   name String
   deltaToken String?
-  oramaIndex Json?
   email_addresses EmailAddress[]
   threads Thread[]
   isSyncedInitially isInitialized @default(start)
@@ -89,7 +90,7 @@ model Email {
     inReplyTo            String?
     references           String?
     threadIndex          String?
-    internetHeaders      Json
+    internetHeaders      Json[]
     nativeProperties     Json?
     folderId             String?
     omitted              String[]
@@ -150,9 +151,4 @@ enum MeetingMessageMethod {
     cancel
     counter
     other
-}
-
-
-enum crdb_internal_region {
-  aws_eu_central_1 @map("aws-eu-central-1")
 }
