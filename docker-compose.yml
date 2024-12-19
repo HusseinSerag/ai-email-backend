@@ -1,14 +1,4 @@
 services:
-  db:
-    image: postgres:15
-    container_name: postgres_db
-    env_file:
-      - .env
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
   redis:
     image: redis:latest
     container_name: redis
@@ -23,12 +13,10 @@ services:
 
     depends_on:
       - redis
-      - db
     env_file:
       - .env
     ports:
       - "3000:3000"
 
 volumes:
-  postgres_data:
   redis_data:

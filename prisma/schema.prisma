@@ -1,155 +1,174 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url  	    = env("DATABASE_URL")
- 
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id String @id @default(cuid())
-  email String @unique
+  id        String  @id @default(cuid())
+  email     String  @unique
   firstName String
-  lastName String
-  imageUrl String?
-  account Account[] @relation("UserAccounts")
+  lastName  String
+  imageUrl  String?
 }
 
 model Account {
-  id String @id @default(cuid()) //coming from aurinko
-  users User[] @relation("UserAccounts")
-  accessToken String @unique
-  emailAddress String @unique
-  name String
-  deltaToken String?
-  oramaIndex Json?
-  email_addresses EmailAddress[]
-  threads Thread[]
+  id                String        @id @default(cuid())
+  accessToken       String        @unique
+  emailAddress      String        @unique
+  name              String
+  deltaToken        String?
+  oramaIndex        Json?
   isSyncedInitially isInitialized @default(start)
-  
-  
-}
-enum isInitialized {
-    start
-    complete
 }
 
 model Thread {
-    id              String   @id @default(cuid())
-    subject         String
-    lastMessageDate DateTime
-    participantIds  String[]
-    accountId       String
-    account         Account  @relation(fields: [accountId], references: [id])
+  id              String   @id @default(cuid())
+  subject         String
+  lastMessageDate DateTime
+  participantIds  String[]
+  accountId       String
+  done            Boolean  @default(false)
+  inboxStatus     Boolean  @default(true)
+  draftStatus     Boolean  @default(false)
+  sentStatus      Boolean  @default(false)
 
-    done Boolean @default(false)
-
-    inboxStatus Boolean @default(true)
-    draftStatus Boolean @default(false)
-    sentStatus  Boolean @default(false)
-
-    emails Email[]
-
-    @@index([accountId])
-    @@index([done])
-    @@index([inboxStatus])
-    @@index([draftStatus])
-    @@index([sentStatus])
-    @@index([lastMessageDate])
+  @@index([accountId])
+  @@index([done])
+  @@index([inboxStatus])
+  @@index([draftStatus])
+  @@index([sentStatus])
+  @@index([lastMessageDate])
 }
 
 model Email {
-    id                   String                @id @default(cuid())
-    threadId             String
-    thread               Thread                @relation(fields: [threadId], references: [id])
-    createdTime          DateTime
-    lastModifiedTime     DateTime
-    sentAt               DateTime
-    receivedAt           DateTime
-    internetMessageId    String
-    subject              String
-    sysLabels            String[]
-    keywords             String[]
-    sysClassifications   String[]
-    sensitivity          Sensitivity           @default(normal)
-    meetingMessageMethod MeetingMessageMethod?
-    from                 EmailAddress          @relation("FromEmail", fields: [fromId], references: [id])
-    fromId               String
-    to                   EmailAddress[]        @relation("ToEmails")
-    cc                   EmailAddress[]        @relation("CcEmails")
-    bcc                  EmailAddress[]        @relation("BccEmails")
-    replyTo              EmailAddress[]        @relation("ReplyToEmails")
-    hasAttachments       Boolean
-    body                 String?
-    bodySnippet          String?
-    attachments          EmailAttachment[]
-    inReplyTo            String?
-    references           String?
-    threadIndex          String?
-    internetHeaders      Json[]
-    nativeProperties     Json?
-    folderId             String?
-    omitted              String[]
+  id                   String                @id @default(cuid())
+  threadId             String
+  createdTime          DateTime
+  lastModifiedTime     DateTime
+  sentAt               DateTime
+  receivedAt           DateTime
+  internetMessageId    String
+  subject              String
+  sysLabels            String[]
+  keywords             String[]
+  sysClassifications   String[]
+  sensitivity          Sensitivity           @default(normal)
+  meetingMessageMethod MeetingMessageMethod?
+  fromId               String
+  hasAttachments       Boolean
+  body                 String?
+  bodySnippet          String?
+  inReplyTo            String?
+  references           String?
+  threadIndex          String?
+  internetHeaders      Json
+  nativeProperties     Json?
+  folderId             String?
+  omitted              String[]
+  emailLabel           EmailLabel            @default(inbox)
 
-    emailLabel EmailLabel @default(inbox)
-
-    @@index([threadId])
-    @@index([emailLabel])
-    @@index([sentAt])
-}
-
-enum EmailLabel {
-    inbox
-    sent
-    draft
+  @@index([threadId])
+  @@index([emailLabel])
+  @@index([sentAt])
 }
 
 model EmailAddress {
-    id            String  @id @default(cuid())
-    name          String?
-    address       String
-    raw           String?
-    sentEmails    Email[] @relation("FromEmail")
-    receivedTo    Email[] @relation("ToEmails")
-    receivedCc    Email[] @relation("CcEmails")
-    receivedBcc   Email[] @relation("BccEmails")
-    replyToEmails Email[] @relation("ReplyToEmails")
+  id        String  @id @default(cuid())
+  name      String?
+  address   String
+  raw       String?
+  accountId String
 
-    accountId String
-    account   Account @relation(fields: [accountId], references: [id])
-
-    @@unique([accountId, address])
+  @@unique([accountId, address])
 }
 
 model EmailAttachment {
-    id              String  @id @default(cuid())
-    name            String
-    mimeType        String
-    size            Int
-    inline          Boolean
-    contentId       String?
-    content         String?
-    contentLocation String?
-    Email           Email   @relation(fields: [emailId], references: [id])
-    emailId         String
+  id              String  @id @default(cuid())
+  name            String
+  mimeType        String
+  size            Int
+  inline          Boolean
+  contentId       String?
+  content         String?
+  contentLocation String?
+  emailId         String
+}
+
+model BccEmails {
+  A String
+  B String
+
+  @@unique([A, B], map: "_BccEmails_AB_unique")
+  @@index([B], map: "_BccEmails_B_index")
+  @@map("_BccEmails")
+}
+
+model CcEmails {
+  A String
+  B String
+
+  @@unique([A, B], map: "_CcEmails_AB_unique")
+  @@index([B], map: "_CcEmails_B_index")
+  @@map("_CcEmails")
+}
+
+model ReplyToEmails {
+  A String
+  B String
+
+  @@unique([A, B], map: "_ReplyToEmails_AB_unique")
+  @@index([B], map: "_ReplyToEmails_B_index")
+  @@map("_ReplyToEmails")
+}
+
+model ToEmails {
+  A String
+  B String
+
+  @@unique([A, B], map: "_ToEmails_AB_unique")
+  @@index([B], map: "_ToEmails_B_index")
+  @@map("_ToEmails")
+}
+
+model UserAccounts {
+  A String
+  B String
+
+  @@unique([A, B], map: "_UserAccounts_AB_unique")
+  @@index([B], map: "_UserAccounts_B_index")
+  @@map("_UserAccounts")
+}
+
+enum isInitialized {
+  start
+  complete
+}
+
+enum EmailLabel {
+  inbox
+  sent
+  draft
 }
 
 enum Sensitivity {
-    normal
-    private
-    personal
-    confidential
+  normal
+  private
+  personal
+  confidential
 }
 
 enum MeetingMessageMethod {
-    request
-    reply
-    cancel
-    counter
-    other
+  request
+  reply
+  cancel
+  counter
+  other
+}
+
+enum crdb_internal_region {
+  aws_eu_central_1 @map("aws-eu-central-1")
 }

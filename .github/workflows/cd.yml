@@ -11,19 +11,31 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Remove images
-        run: sudo docker image prune -af
-      - name: Download env file from s3
-        run: aws s3 cp s3://${{ secrets.S3_BUCKETNAME }}/.env /home/ubuntu/.env; pwd
-
-      - name: navigate to deployment dir
-        run: cd /home/ubuntu
-
-      - name: Log in to Docker Hub
-        run: sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" -p ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: start docker containers
+      - name: Docker cleanup
         run: |
-          sudo docker compose down
-          sudo docker compose pull
-          sudo docker compose up
+
+          sudo docker container stop pipeline-email-ai-backend-container
+          sudo docker container stop redis 
+          sudo docker container rm pipeline-email-ai-backend-container
+          sudo docker container rm redis
+          sudo docker network rm app 
+          sudo docker container prune -f
+          sudo docker image prune -af
+          sudo docker volume prune -f
+          sudo docker network prune -f
+
+      - name: Pull docker image
+        run: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/pipeline-email-ai-backend:latest
+
+      - name: Delete old docker container
+        run: sudo docker rm -f pipeline-email-ai-backend-container || true
+
+      - name: Download env file from s3
+        run: aws s3 cp s3://${{ secrets.S3_BUCKETNAME }}/.env .env; pwd
+
+      - name: create common network
+        run: sudo docker network create app
+      - name: start redis container
+        run: sudo docker run -d --name redis --network app -p 6379:6379 redis:latest
+      - name: Run Docker container
+        run: sudo docker run -d -p 3000:3000 --env-file .env --network app --name pipeline-email-ai-backend-container ${{ secrets.DOCKER_USERNAME }}/pipeline-email-ai-backend
