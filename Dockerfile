@@ -18,7 +18,7 @@ FROM node:lts-slim AS runner
 
 # Set the working directory
 WORKDIR /usr/app
-
+RUN apt-get update -y && apt-get install -y openssl
 # Copy only the necessary files from the build stage
 COPY --from=builder /usr/app/node_modules ./node_modules
 COPY --from=builder /usr/app/build ./build
