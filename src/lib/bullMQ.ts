@@ -9,7 +9,7 @@ import { io } from "../main";
 
 export const syncEmailQueue = new Queue("email-sync", {
   connection: {
-    host: "redis",
+    host: process.env.NODE_ENV === "production" ? "redis" : "localhost",
     port: 6379,
   },
   defaultJobOptions: {
@@ -23,7 +23,7 @@ export const syncEmailQueue = new Queue("email-sync", {
 
 export const eventQueue = new QueueEvents("email-sync", {
   connection: {
-    host: "redis",
+    host: process.env.NODE_ENV === "production" ? "redis" : "localhost",
     port: 6379,
   },
 });
@@ -123,7 +123,7 @@ export const worker = new Worker(
   },
   {
     connection: {
-      host: "redis",
+      host: process.env.NODE_ENV === "production" ? "redis" : "localhost",
       port: 6379,
     },
     lockDuration: 60000,

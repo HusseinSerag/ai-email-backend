@@ -32,13 +32,12 @@ export class OramaClient {
     }
     if (account.oramaIndex) {
       this.orama = await restore("json", account.oramaIndex as any);
-      console.log(this.orama);
     } else {
       this.orama = create({
         schema: {
           subject: "string",
           body: "string",
-          //rawBody: "string",
+          rawBody: "string",
           from: "string",
           to: "string[]",
           sentAt: "string",

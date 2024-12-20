@@ -7,7 +7,8 @@ import { eventQueue } from "./bullMQ";
 import axios from "axios";
 import { UploadToS3, getS3Url } from "./s3";
 import { OramaClient } from "./orama";
-import { threadId } from "worker_threads";
+
+import { turndown } from "./turndown";
 
 export async function syncEmailsToDB(
   emails: EmailMessage[],
@@ -39,13 +40,17 @@ export async function syncEmailsToDB(
 
     for (const email of emails) {
       await upsertEmail(email, accountId, index++);
+      const turnedDownBody = turndown.turndown(
+        email.body ?? email.bodySnippet ?? ""
+      );
       await orama.insert({
         subject: email.subject,
-        body: email.body ?? "",
+        body: turnedDownBody,
         from: email.from.address,
         to: email.to.map((t) => t.address),
         sentAt: email.sentAt,
         threadId: email.threadId,
+        rawBody: email.bodySnippet ?? "",
       });
       if (jobId && userId) {
         eventQueue.emit(

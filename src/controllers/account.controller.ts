@@ -397,7 +397,7 @@ export async function searchThreads(
       term: query,
     });
     let response = resp.hits.map((hit) => hit.document);
-
+    console.log("hereee");
     sendSuccessResponse(res, response, HttpStatusCode.CREATED);
   } catch (e) {
     next(e);

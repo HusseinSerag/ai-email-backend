@@ -23,7 +23,7 @@ export class Account {
         },
 
         params: {
-          daysWithin: 2,
+          daysWithin: 0,
           bodyType: "html",
         },
       }
@@ -108,8 +108,6 @@ export class Account {
     attachments?: Omit<EmailAttachment, "id" | "size">[];
   }) {
     try {
-      console.log(body.attachments);
-
       const res = await axios.post(
         "https://api.aurinko.io/v1/email/messages",
 
