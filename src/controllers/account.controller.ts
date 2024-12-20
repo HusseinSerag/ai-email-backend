@@ -99,6 +99,8 @@ export async function getThreadsAccount(
     {
       tab: "inbox" | "sent" | "draft";
       isDone: "true" | "false";
+      page: number;
+      offset: number;
     }
   >,
   res: Response,
@@ -108,7 +110,7 @@ export async function getThreadsAccount(
   // filter by done
   try {
     const { id: accountId } = req.params;
-    const { tab = "inbox", isDone = false } = req.query;
+    const { tab = "inbox", isDone = false, offset = 10, page = 0 } = req.query;
     const { id: userId } = req.user!;
 
     const account = await getAccountAssociatedWithUser({
@@ -116,7 +118,6 @@ export async function getThreadsAccount(
       accountId,
     });
 
-    //new Account(account.accessToken).syncEmails().catch(log.error);
     let filter: Prisma.ThreadWhereInput = {};
     if (tab === "inbox") {
       filter.inboxStatus = true;
@@ -152,7 +153,9 @@ export async function getThreadsAccount(
           },
         },
       },
-      take: 15,
+      skip: +offset * +page,
+      take: +offset,
+
       orderBy: {
         lastMessageDate: "desc",
       },
@@ -170,9 +173,20 @@ export async function getThreadsAccount(
       )
     );
 
+    const totalCount = await prisma.thread.count({ where: filter });
+    const totalPages = Math.ceil(totalCount / offset);
+
+    const response = {
+      data: sentThreads,
+      meta: {
+        currentPage: page,
+        totalPages,
+        totalCount,
+      },
+    };
     sendSuccessResponse(
       res,
-      sentThreads,
+      response,
 
       HttpStatusCode.OK
     );

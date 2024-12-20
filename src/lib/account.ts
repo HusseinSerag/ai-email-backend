@@ -23,7 +23,7 @@ export class Account {
         },
 
         params: {
-          daysWithin: 0,
+          daysWithin: 1,
           bodyType: "html",
         },
       }
