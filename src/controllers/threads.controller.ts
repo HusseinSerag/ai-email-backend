@@ -82,3 +82,53 @@ export async function getThreadInformation(
     next(e);
   }
 }
+
+export async function getThread(
+  req: IRequest<{
+    id: string;
+    threadId: string;
+  }>,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { id: accountId, threadId } = req.params;
+    const { id: userId } = req.user!;
+    const account = await getAccountAssociatedWithUser({
+      accountId,
+      userId,
+    });
+    const thread = await prisma.thread.findFirst({
+      where: {
+        id: threadId,
+        accountId: account.id,
+      },
+      include: {
+        emails: {
+          orderBy: { sentAt: "asc" },
+          select: {
+            from: true,
+            body: true,
+            bodySnippet: true,
+            emailLabel: true,
+            subject: true,
+            sentAt: true,
+            id: true,
+            sysLabels: true,
+            to: true,
+            replyTo: true,
+            cc: true,
+            attachments: true,
+          },
+        },
+      },
+    });
+
+    if (!thread)
+      throw new CustomError("Thread doesn't exist", HttpStatusCode.NOT_FOUND);
+
+    sendSuccessResponse(res, thread, HttpStatusCode.OK);
+  } catch (e) {
+    next(e);
+  }
+}

@@ -110,6 +110,7 @@ export async function getThreadsAccount(
     const { id: accountId } = req.params;
     const { tab = "inbox", isDone = false } = req.query;
     const { id: userId } = req.user!;
+
     const account = await getAccountAssociatedWithUser({
       userId,
       accountId,
@@ -397,7 +398,7 @@ export async function searchThreads(
       term: query,
     });
     let response = resp.hits.map((hit) => hit.document);
-    console.log("hereee");
+
     sendSuccessResponse(res, response, HttpStatusCode.CREATED);
   } catch (e) {
     next(e);

@@ -9,7 +9,10 @@ import {
   sendEmailAcc,
 } from "../controllers/account.controller";
 import { requireAuth } from "../middleware/requireAuth";
-import { getThreadInformation } from "../controllers/threads.controller";
+import {
+  getThread,
+  getThreadInformation,
+} from "../controllers/threads.controller";
 import multer, { memoryStorage } from "multer";
 const router = Router();
 const storage = memoryStorage();
@@ -21,6 +24,7 @@ router.get("/thread-count/:id", requireAuth, getThreadCountAccounts);
 router.get("/threads/:id", requireAuth, getThreadsAccount);
 router.get("/suggestions/:id", requireAuth, getSuggestions);
 router.get("/thread/:id/:threadId", requireAuth, getThreadInformation);
+router.get("/get-thread/:id/:threadId", requireAuth, getThread);
 router.get("/search/:id", requireAuth, searchThreads);
 router.post(
   "/send/:id",
