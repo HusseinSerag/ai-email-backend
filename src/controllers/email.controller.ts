@@ -51,9 +51,14 @@ export async function onboardEmail(
       let userId = JSON.parse(req.query.state);
 
       // if webhook fails create a user in our DB
-      // const user = prisma.user.findUnique({
-
-      // })
+      const user = await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      });
+      if (!user) {
+        // create user and use the id
+      }
       // if user already have an account with the same address dont create anything
       const account = await prisma.account.findUnique({
         where: {

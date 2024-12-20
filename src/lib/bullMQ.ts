@@ -12,14 +12,22 @@ export const syncEmailQueue = new Queue("email-sync", {
     host: "redis",
     port: 6379,
   },
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: {
+      type: "exponential",
+      delay: 5000,
+    },
+  },
 });
+
 export const eventQueue = new QueueEvents("email-sync", {
   connection: {
     host: "redis",
     port: 6379,
   },
 });
-log.info(process.env.REDIS_URL);
+
 eventQueue.on("completed", (job) => {
   const [userId, accountId] = job.returnvalue.split(":");
   // send message that it is completed
@@ -118,5 +126,7 @@ export const worker = new Worker(
       host: "redis",
       port: 6379,
     },
+    lockDuration: 60000,
+    concurrency: 2,
   }
 );
