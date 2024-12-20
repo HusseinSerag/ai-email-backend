@@ -193,7 +193,7 @@ async function upsertEmail(
         bcc: { set: bccAddress.map((a) => ({ id: a!.id })) },
         replyTo: { set: replyToAddress.map((a) => ({ id: a!.id })) },
         hasAttachments: email.hasAttachments,
-        internetHeaders: email.internetHeaders as any,
+        internetHeaders: [JSON.stringify(email.internetHeaders)],
         body: email.body,
         bodySnippet: email.bodySnippet,
         inReplyTo: email.inReplyTo,

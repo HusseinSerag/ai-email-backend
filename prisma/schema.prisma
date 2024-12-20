@@ -88,7 +88,7 @@ model Email {
   inReplyTo            String?
   references           String?
   threadIndex          String?
-  internetHeaders      Json 
+  internetHeaders      String[] 
   nativeProperties     Json?
   folderId             String?
   omitted              String[]
