@@ -215,7 +215,7 @@ async function upsertEmail(
         internetMessageId: email.internetMessageId,
         subject: email?.subject || "",
         sysLabels: email.sysLabels,
-        internetHeaders: email.internetHeaders as any,
+        internetHeaders: [JSON.stringify(email.internetHeaders) as any],
         keywords: email.keywords,
         sysClassifications: email.sysClassifications,
         sensitivity: email.sensitivity,
