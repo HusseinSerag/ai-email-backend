@@ -377,6 +377,7 @@ export async function sendEmailAcc(
 
     sendSuccessResponse(res, {}, HttpStatusCode.CREATED);
   } catch (e) {
+    log.error(e);
     next(e);
   }
 }
