@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { generateAIemail } from "../controllers/account.controller";
 import { requireAuth } from "../middleware/requireAuth";
+import { generateAIemail } from "../controllers/ai.controller";
 
 const router = Router();
 router.post("/generate", requireAuth, generateAIemail);

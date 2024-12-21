@@ -1,6 +1,5 @@
 import { Router } from "express";
 import {
-  generateAIemail,
   getAccountsUsers,
   getSuggestions,
   getThreadCountAccounts,

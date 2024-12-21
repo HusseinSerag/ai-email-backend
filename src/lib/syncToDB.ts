@@ -9,6 +9,7 @@ import { UploadToS3, getS3Url } from "./s3";
 import { OramaClient } from "./orama";
 
 import { turndown } from "./turndown";
+import { generateEmbeddings } from "./analyzeEmail";
 
 export async function syncEmailsToDB(
   emails: EmailMessage[],
@@ -43,6 +44,7 @@ export async function syncEmailsToDB(
       const turnedDownBody = turndown.turndown(
         email.body ?? email.bodySnippet ?? ""
       );
+      const embeddings = await generateEmbeddings(turnedDownBody);
       await orama.insert({
         subject: email.subject,
         body: turnedDownBody,
@@ -51,7 +53,9 @@ export async function syncEmailsToDB(
         sentAt: email.sentAt,
         threadId: email.threadId,
         rawBody: email.bodySnippet ?? "",
+        embeddings: embeddings,
       });
+      await orama.saveIndex();
       if (jobId && userId) {
         eventQueue.emit(
           "progress",

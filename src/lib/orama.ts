@@ -2,6 +2,7 @@ import { create, insert, search, type AnyOrama } from "@orama/orama";
 import { prisma } from "./prismaClient";
 import { CustomError, HttpStatusCode } from "./customError";
 import { persist, restore } from "@orama/plugin-data-persistence";
+import { generateEmbeddings } from "./analyzeEmail";
 
 export class OramaClient {
   //@ts-ignore
@@ -41,7 +42,7 @@ export class OramaClient {
           from: "string",
           to: "string[]",
           sentAt: "string",
-          //  embeddings: "vector[1536]",
+          embeddings: "vector[1536]",
           threadId: "string",
         },
       });
@@ -57,7 +58,22 @@ export class OramaClient {
   }
   async insert(doc: any) {
     await insert(this.orama, doc);
-    await this.saveIndex();
+
     return this;
+  }
+
+  async vectorSearch({ term }: { term: string }) {
+    const embeddings = await generateEmbeddings(term);
+    const result = await search(this.orama, {
+      mode: "hybrid",
+      term: term,
+      vector: {
+        value: embeddings,
+        property: "embeddings",
+      },
+      similarity: 0.8,
+      limit: 10,
+    });
+    return result;
   }
 }

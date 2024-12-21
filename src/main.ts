@@ -11,9 +11,31 @@ import http from "http";
 import { setupSocketIO } from "./lib/setupSocketIO";
 
 import { validateNotification } from "./routes/webhook";
+import log from "./lib/logger";
 const app = express();
 const server = http.createServer(app);
 export const io = setupSocketIO(server);
+
+process.on("unhandledRejection", (reason, promise) => {
+  log.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+process.on("uncaughtException", (error) => {
+  log.error("Uncaught Exception:", error);
+});
+
+process.on("SIGTERM", () => {
+  log.fatal("SIGTERM received, shutting down gracefully...");
+  server.close(() => {
+    log.error("Closed all remaining connections.");
+    process.exit(0);
+  });
+
+  setTimeout(() => {
+    log.fatal("Forcing shutdown after timeout...");
+    process.exit(1);
+  }, 10000);
+});
 
 app.use(cookieParser());
 app.use(
