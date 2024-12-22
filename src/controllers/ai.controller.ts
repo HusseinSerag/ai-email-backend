@@ -4,20 +4,12 @@ import {
   askQuestion,
   generateContext,
   generateEmail,
+  performVectorSearch,
 } from "../services/ai.service";
-import { OramaClient } from "../lib/orama";
-import { turndown } from "../helpers/turndown";
-import { summarizeText } from "../lib/analyzeEmail";
+import { GenerateAIEmail, GenerateChat } from "../validation/ai";
 
 export async function generateAIemail(
-  req: IRequest<
-    {},
-    {},
-    {
-      prompt: string;
-      context: string;
-    }
-  >,
+  req: IRequest<{}, {}, GenerateAIEmail["query"]>,
   res: Response,
   next: NextFunction
 ) {
@@ -39,45 +31,25 @@ export async function generateAIemail(
   }
 }
 
-interface Message {
-  content: string;
-  id: string;
-  role: "user" | "system";
-}
 export async function generateChat(
-  req: IRequest<
-    {},
-    {},
-    {
-      accountId: string;
-      messages: Message[];
-    }
-  >,
+  req: IRequest<GenerateChat["params"], unknown, GenerateChat["body"]>,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const { accountId, messages } = req.body;
-
+    const { messages } = req.body;
+    const { id: accountId } = req.params;
     res.setHeader("Transfer-Encoding", "chunked");
     res.flushHeaders();
-    const orama = new OramaClient(accountId);
-    await orama.init();
-
     const content = messages[messages.length - 1].content;
-    const searchResults = await orama.vectorSearch({
-      term: content,
-    });
-
+    const searchResults = await performVectorSearch(content, accountId);
     const context = await generateContext(searchResults);
-
     const stream = await askQuestion(context.join("\n"), messages);
     for await (const part of stream) {
       if (part.choices[0].finish_reason === "stop") {
         res.end();
         return;
       }
-
       res.write(part.choices[0].delta.content);
     }
   } catch (e) {

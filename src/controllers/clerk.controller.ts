@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { CustomError, HttpStatusCode } from "../helpers/customError";
 import { Webhook } from "svix";
 import { sendSuccessResponse } from "../helpers/sendResponse";
-import { prisma } from "../lib/prismaClient";
+
 import log from "../helpers/logger";
 import { clerkWebhookService } from "../services/clerk.service";
 

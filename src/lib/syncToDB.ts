@@ -9,7 +9,7 @@ import { UploadToS3, getS3Url } from "./s3";
 import { OramaClient } from "./orama";
 
 import { turndown } from "../helpers/turndown";
-import { generateEmbeddings } from "./analyzeEmail";
+import { generateEmbeddings } from "../helpers/analyzeEmail";
 
 export async function syncEmailsToDB(
   emails: EmailMessage[],

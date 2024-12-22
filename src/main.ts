@@ -10,7 +10,7 @@ import { routes } from "./routes/routes";
 import http from "http";
 import { setupSocketIO } from "./lib/setupSocketIO";
 
-import { validateNotification } from "./routes/webhook";
+import { validateNotification } from "./controllers/aurinkoWebhook";
 import log from "./helpers/logger";
 const app = express();
 const server = http.createServer(app);

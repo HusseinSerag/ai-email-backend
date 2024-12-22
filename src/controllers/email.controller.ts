@@ -3,15 +3,21 @@ import {
   exchangeCodeForAccessToken,
   getAccountDetail,
   getAurinkoAuthURL,
-} from "../lib/aurinko";
-import { IRequest } from "../type";
+} from "../helpers/aurinko";
+import { EmailAttachment, IRequest } from "../type";
 import { sendSuccessResponse } from "../helpers/sendResponse";
-import { CustomError, HttpStatusCode } from "../helpers/customError";
+import { HttpStatusCode } from "../helpers/customError";
 import { prisma } from "../lib/prismaClient";
 import log from "../helpers/logger";
-import { syncEmailQueue } from "../lib/bullMQ";
+
 import crypto from "crypto";
-import { connectedUsers } from "../helpers/socket";
+import { getAccountAssociatedWithUser } from "../middleware/getAccountUser";
+import { Account } from "../lib/account";
+import { uploadFilesService } from "../helpers/uploadFileService";
+import { SendEmailBody } from "../validation/email";
+import { AccountId } from "./../validation/account";
+import { sendEmailService } from "../services/emails.service";
+import { syncEmailQueue } from "../background/queues";
 
 export function getAurinkoUrl(
   req: IRequest,
@@ -22,6 +28,34 @@ export function getAurinkoUrl(
   sendSuccessResponse(res, url, HttpStatusCode.OK);
 }
 
+export async function sendEmailController(
+  req: IRequest<AccountId, unknown, SendEmailBody>,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { id: accountId } = req.params;
+
+    const { id: userId } = req.user!;
+
+    const account = await getAccountAssociatedWithUser({
+      userId,
+      accountId,
+    });
+
+    const filesUploaded = await uploadFilesService(req.files);
+
+    await sendEmailService(account.accessToken, {
+      ...req.body,
+      filesUploaded,
+    });
+
+    sendSuccessResponse(res, {}, HttpStatusCode.CREATED);
+  } catch (e) {
+    log.error(e);
+    next(e);
+  }
+}
 export async function onboardEmail(
   req: IRequest<
     {},

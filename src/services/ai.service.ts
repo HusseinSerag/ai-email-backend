@@ -1,6 +1,8 @@
-import { openAi, summarizeText } from "../lib/analyzeEmail";
+import { openAi, summarizeText } from "../helpers/analyzeEmail";
 import { turndown } from "../helpers/turndown";
 import { search } from "@orama/orama";
+import { Message } from "../validation/ai";
+import { OramaClient } from "../lib/orama";
 export async function generateEmail(context: string, prompt: string) {
   try {
     const stream = await openAi.chat.completions.create(
@@ -52,11 +54,6 @@ export async function generateEmail(context: string, prompt: string) {
   }
 }
 
-interface Message {
-  content: string;
-  id: string;
-  role: "user" | "system";
-}
 export async function askQuestion(
   context: string,
 
@@ -108,6 +105,20 @@ export async function generateContext(
         return summarizeText(body);
       })
     );
+  } catch (e) {
+    throw e;
+  }
+}
+
+export async function performVectorSearch(content: string, accountId: string) {
+  try {
+    const orama = new OramaClient(accountId);
+    await orama.init();
+
+    const searchResults = await orama.vectorSearch({
+      term: content,
+    });
+    return searchResults;
   } catch (e) {
     throw e;
   }
