@@ -65,24 +65,40 @@ export async function getThreadCountAccounts(
         accountId,
       },
     });
-    const inbox: Thread[] = [];
-    const draft: Thread[] = [];
-    const sent: Thread[] = [];
-    threadCount.forEach((thread) => {
-      if (thread.draftStatus) {
-        draft.push(thread);
-      } else if (thread.inboxStatus) {
-        inbox.push(thread);
-      } else if (thread.sentStatus) {
-        sent.push(thread);
-      }
-    });
+    const stats = await Promise.all([
+      prisma.thread.count({
+        where: {
+          accountId,
+          draftStatus: true,
+        },
+      }),
+      prisma.thread.count({
+        where: {
+          accountId,
+          inboxStatus: true,
+        },
+      }),
+      prisma.thread.count({
+        where: {
+          accountId,
+          sentStatus: true,
+        },
+      }),
+      prisma.thread.count({
+        where: {
+          accountId,
+          starred: true,
+        },
+      }),
+    ]);
+
     sendSuccessResponse(
       res,
       {
-        draft: draft.length,
-        sent: sent.length,
-        inbox: inbox.length,
+        draft: stats[0],
+        inbox: stats[1],
+        sent: stats[2],
+        starred: stats[3],
       },
       HttpStatusCode.OK
     );
@@ -99,7 +115,7 @@ export async function getThreadsAccount(
     {},
     {},
     {
-      tab: "inbox" | "sent" | "draft";
+      tab: "inbox" | "sent" | "draft" | "starred";
       isDone: "true" | "false";
       page: number;
       offset: number;
@@ -127,6 +143,8 @@ export async function getThreadsAccount(
       filter.draftStatus = true;
     } else if (tab === "sent") {
       filter.sentStatus = true;
+    } else if (tab === "starred") {
+      filter.starred = true;
     }
     filter.done = {
       equals: isDone === "true" ? true : false,

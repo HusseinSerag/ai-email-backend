@@ -132,3 +132,47 @@ export async function getThread(
     next(e);
   }
 }
+
+export async function toggleStarThread(
+  req: IRequest<{
+    id: string;
+    threadId: string;
+  }>,
+  res: Response,
+  next: NextFunction
+) {
+  const { id: accountId, threadId } = req.params;
+  const { id: userId } = req.user!;
+  try {
+    const account = await getAccountAssociatedWithUser({
+      accountId,
+      userId,
+    });
+
+    const thread = await prisma.thread.findUnique({
+      where: {
+        id: threadId,
+      },
+    });
+    if (!thread)
+      throw new CustomError("Thread doesnt exist", HttpStatusCode.NOT_FOUND);
+    const t = await prisma.thread.update({
+      where: {
+        id: threadId,
+      },
+      data: {
+        starred: !thread.starred,
+      },
+    });
+
+    sendSuccessResponse(
+      res,
+      {
+        starred: t.starred,
+      },
+      HttpStatusCode.OK
+    );
+  } catch (e) {
+    throw e;
+  }
+}

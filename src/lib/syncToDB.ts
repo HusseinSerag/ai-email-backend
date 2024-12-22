@@ -165,6 +165,7 @@ async function upsertEmail(
         draftStatus: emailLabelType === "draft",
         inboxStatus: emailLabelType === "inbox",
         sentStatus: emailLabelType === "sent",
+        starred: email.sysLabels.includes("important"),
         lastMessageDate: new Date(email.sentAt),
         participantIds: [
           ...new Set([

@@ -11,6 +11,7 @@ import { requireAuth } from "../middleware/requireAuth";
 import {
   getThread,
   getThreadInformation,
+  toggleStarThread,
 } from "../controllers/threads.controller";
 import multer, { memoryStorage } from "multer";
 const router = Router();
@@ -25,6 +26,7 @@ router.get("/suggestions/:id", requireAuth, getSuggestions);
 router.get("/thread/:id/:threadId", requireAuth, getThreadInformation);
 router.get("/get-thread/:id/:threadId", requireAuth, getThread);
 router.get("/search/:id", requireAuth, searchThreads);
+router.patch("/thread/star/:id/:threadId", requireAuth, toggleStarThread);
 router.post(
   "/send/:id",
   requireAuth,
