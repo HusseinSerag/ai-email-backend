@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { IRequest } from "../type";
-import { CustomError, HttpStatusCode } from "../lib/customError";
+import { CustomError, HttpStatusCode } from "../helpers/customError";
 import { clerkClient } from "@clerk/express";
 
 export async function requireAuth(

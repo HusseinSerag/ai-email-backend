@@ -6,8 +6,8 @@ import {
   SyncResponse,
   SyncUpdatedResponse,
 } from "../type";
-import log from "./logger";
-import { CustomError, HttpStatusCode } from "./customError";
+import log from "../helpers/logger";
+import { CustomError, HttpStatusCode } from "../helpers/customError";
 import { prisma } from "./prismaClient";
 import { syncEmailsToDB } from "./syncToDB";
 

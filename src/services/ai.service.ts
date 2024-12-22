@@ -1,5 +1,6 @@
-import { openAi } from "../lib/analyzeEmail";
-
+import { openAi, summarizeText } from "../lib/analyzeEmail";
+import { turndown } from "../helpers/turndown";
+import { search } from "@orama/orama";
 export async function generateEmail(context: string, prompt: string) {
   try {
     const stream = await openAi.chat.completions.create(
@@ -92,6 +93,21 @@ When responding, please keep in mind:
     );
 
     return stream;
+  } catch (e) {
+    throw e;
+  }
+}
+
+export async function generateContext(
+  searchResults: Awaited<ReturnType<typeof search<any, any>>>
+) {
+  try {
+    return await Promise.all(
+      searchResults.hits.map(async (result) => {
+        const body = turndown.turndown(result.document.body);
+        return summarizeText(body);
+      })
+    );
   } catch (e) {
     throw e;
   }

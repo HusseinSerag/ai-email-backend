@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { IRequest } from "../type";
-import { CustomError, HttpStatusCode } from "../lib/customError";
-import { sendErrorResponse } from "../lib/sendResponse";
-import log from "../lib/logger";
+import { CustomError, HttpStatusCode } from "../helpers/customError";
+import { sendErrorResponse } from "../helpers/sendResponse";
+import log from "../helpers/logger";
 
 export function globalErrorHandler(
   err: Error,

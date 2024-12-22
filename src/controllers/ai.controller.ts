@@ -1,8 +1,12 @@
 import { NextFunction, Response } from "express";
 import { IRequest } from "../type";
-import { askQuestion, generateEmail } from "../services/ai.service";
+import {
+  askQuestion,
+  generateContext,
+  generateEmail,
+} from "../services/ai.service";
 import { OramaClient } from "../lib/orama";
-import { turndown } from "../lib/turndown";
+import { turndown } from "../helpers/turndown";
 import { summarizeText } from "../lib/analyzeEmail";
 
 export async function generateAIemail(
@@ -65,12 +69,7 @@ export async function generateChat(
       term: content,
     });
 
-    const context = await Promise.all(
-      searchResults.hits.map(async (result) => {
-        const body = turndown.turndown(result.document.body);
-        return summarizeText(body);
-      })
-    );
+    const context = await generateContext(searchResults);
 
     const stream = await askQuestion(context.join("\n"), messages);
     for await (const part of stream) {

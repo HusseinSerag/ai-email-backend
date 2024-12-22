@@ -6,7 +6,7 @@ export interface IRequest<
   Params = any,
   ResBody = any,
   ReqBody = any,
-  ReqQuery = any
+  ReqQuery = any,
 > extends Request<Params, ResBody, ReqBody, ReqQuery> {
   auth?: AuthObject;
   user?: User;
@@ -79,6 +79,11 @@ export interface EmailAddress {
   address: string;
   raw?: string;
 }
+export const emailAddress = z.object({
+  name: z.string().optional(),
+  address: z.string(),
+  raw: z.string().optional(),
+});
 
 export interface EmailAttachment {
   id: string;

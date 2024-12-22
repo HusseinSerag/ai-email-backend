@@ -1,7 +1,7 @@
 import { Server as HttpServer } from "http";
 import { Server, Socket } from "socket.io";
-import log from "./logger";
-import { connectedUsers } from "./socket";
+import log from "../helpers/logger";
+import { connectedUsers } from "../helpers/socket";
 export function setupSocketIO(server: HttpServer) {
   const io = new Server(server, {
     cors: {

@@ -1,17 +1,31 @@
 import { NextFunction, Response } from "express";
 import { IRequest } from "../type";
-import { prisma } from "../lib/prismaClient";
+
 import { getAccountAssociatedWithUser } from "../middleware/getAccountUser";
-import { sendSuccessResponse } from "../lib/sendResponse";
-import { CustomError, HttpStatusCode } from "../lib/customError";
-import { writeFileSync } from "fs";
-import { transformDocument } from "@prisma/client/runtime";
+import { sendSuccessResponse } from "../helpers/sendResponse";
+import { HttpStatusCode } from "../helpers/customError";
+
+import {
+  getThreadInfoService,
+  getThreadService,
+  searchThreadService,
+  toggleArchiveService,
+  toggleStarService,
+} from "../services/threads.service";
+
+import {
+  getThreadsService,
+  threadStatsService,
+} from "../services/threads.service";
+import { AccountId } from "./../validation/account";
+import {
+  GetThreads,
+  RequireAccountAndThreadId,
+  searchThread,
+} from "../validation/threads";
 
 export async function getThreadInformation(
-  req: IRequest<{
-    id: string;
-    threadId: string;
-  }>,
+  req: IRequest<RequireAccountAndThreadId["params"]>,
   res: Response,
   next: NextFunction
 ) {
@@ -22,72 +36,15 @@ export async function getThreadInformation(
       accountId,
       userId,
     });
-    const thread = await prisma.thread.findUnique({
-      where: {
-        id: threadId,
-      },
-      include: {
-        emails: {
-          orderBy: { sentAt: "asc" },
-          select: {
-            from: true,
-            to: true,
-            cc: true,
-            bcc: true,
-            sentAt: true,
-            subject: true,
-            internetMessageId: true,
-            replyTo: true,
-            references: true,
-          },
-        },
-      },
-    });
-
-    if (!thread)
-      throw new CustomError("Thread doesn't exist", HttpStatusCode.NOT_FOUND);
-    ////
-    console.log("here");
-    let lastExternalEmail = thread.emails
-      .reverse()
-      .find((email) => email.from.address !== account.emailAddress);
-    let fromMe = !!lastExternalEmail;
-    if (!lastExternalEmail) {
-      lastExternalEmail = thread.emails.reverse()[0];
-    }
-    const valueReturned = {
-      subject: lastExternalEmail.subject,
-      to: [
-        fromMe && lastExternalEmail.from,
-        ...lastExternalEmail.to.filter(
-          (to) => to.address !== account.emailAddress
-        ),
-      ].filter(Boolean),
-      cc: [
-        ...lastExternalEmail.cc,
-        ...lastExternalEmail.cc.filter(
-          (cc) => cc.address !== account.emailAddress
-        ),
-      ],
-      from: {
-        name: account.name,
-        address: account.emailAddress,
-      },
-      id: lastExternalEmail.internetMessageId,
-      replyTo: lastExternalEmail.replyTo,
-      references: lastExternalEmail.references,
-    };
-    sendSuccessResponse(res, valueReturned, HttpStatusCode.OK);
+    const info = await getThreadInfoService(account, threadId);
+    sendSuccessResponse(res, info, HttpStatusCode.OK);
   } catch (e) {
     next(e);
   }
 }
 
-export async function getThread(
-  req: IRequest<{
-    id: string;
-    threadId: string;
-  }>,
+export async function getThreadController(
+  req: IRequest<RequireAccountAndThreadId["params"]>,
   res: Response,
   next: NextFunction
 ) {
@@ -98,34 +55,7 @@ export async function getThread(
       accountId,
       userId,
     });
-    const thread = await prisma.thread.findFirst({
-      where: {
-        id: threadId,
-        accountId: account.id,
-      },
-      include: {
-        emails: {
-          orderBy: { sentAt: "asc" },
-          select: {
-            from: true,
-            body: true,
-            bodySnippet: true,
-            emailLabel: true,
-            subject: true,
-            sentAt: true,
-            id: true,
-            sysLabels: true,
-            to: true,
-            replyTo: true,
-            cc: true,
-            attachments: true,
-          },
-        },
-      },
-    });
-
-    if (!thread)
-      throw new CustomError("Thread doesn't exist", HttpStatusCode.NOT_FOUND);
+    const thread = await getThreadService(account.id, threadId);
 
     sendSuccessResponse(res, thread, HttpStatusCode.OK);
   } catch (e) {
@@ -133,11 +63,8 @@ export async function getThread(
   }
 }
 
-export async function toggleStarThread(
-  req: IRequest<{
-    id: string;
-    threadId: string;
-  }>,
+export async function toggleStarController(
+  req: IRequest<RequireAccountAndThreadId["params"]>,
   res: Response,
   next: NextFunction
 ) {
@@ -149,26 +76,12 @@ export async function toggleStarThread(
       userId,
     });
 
-    const thread = await prisma.thread.findUnique({
-      where: {
-        id: threadId,
-      },
-    });
-    if (!thread)
-      throw new CustomError("Thread doesnt exist", HttpStatusCode.NOT_FOUND);
-    const t = await prisma.thread.update({
-      where: {
-        id: threadId,
-      },
-      data: {
-        starred: !thread.starred,
-      },
-    });
+    const thread = await toggleStarService(threadId);
 
     sendSuccessResponse(
       res,
       {
-        starred: t.starred,
+        starred: thread.starred,
       },
       HttpStatusCode.OK
     );
@@ -177,11 +90,8 @@ export async function toggleStarThread(
   }
 }
 
-export async function toggleArchiveThread(
-  req: IRequest<{
-    id: string;
-    threadId: string;
-  }>,
+export async function toggleArchiveController(
+  req: IRequest<RequireAccountAndThreadId["params"]>,
   res: Response,
   next: NextFunction
 ) {
@@ -193,30 +103,124 @@ export async function toggleArchiveThread(
       userId,
     });
 
-    const thread = await prisma.thread.findUnique({
-      where: {
-        id: threadId,
-      },
-    });
-    if (!thread)
-      throw new CustomError("Thread doesnt exist", HttpStatusCode.NOT_FOUND);
-    const t = await prisma.thread.update({
-      where: {
-        id: threadId,
-      },
-      data: {
-        archived: !thread.archived,
-      },
-    });
+    const thread = await toggleArchiveService(threadId);
 
     sendSuccessResponse(
       res,
       {
-        archived: t.archived,
+        archived: thread.archived,
       },
       HttpStatusCode.OK
     );
   } catch (e) {
     throw e;
+  }
+}
+
+export async function searchThreadsController(
+  req: IRequest<
+    searchThread["params"],
+    unknown,
+    unknown,
+    searchThread["query"]
+  >,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { id: accountId } = req.params;
+
+    const { id: userId } = req.user!;
+    const { query } = req.query;
+
+    const account = await getAccountAssociatedWithUser({
+      userId,
+      accountId,
+    });
+
+    const results = await searchThreadService(account.id, query);
+
+    sendSuccessResponse(res, results, HttpStatusCode.CREATED);
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function threadStatsController(
+  req: IRequest<AccountId>,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { id: accountId } = req.params;
+    const { id: userId } = req.user!;
+    await getAccountAssociatedWithUser({
+      accountId,
+      userId,
+    });
+
+    const stats = await threadStatsService(accountId);
+
+    sendSuccessResponse(
+      res,
+      {
+        draft: stats[0],
+        inbox: stats[1],
+        sent: stats[2],
+        starred: stats[3],
+      },
+      HttpStatusCode.OK
+    );
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function getThreadsController(
+  req: IRequest<GetThreads["params"], unknown, unknown, GetThreads["query"]>,
+  res: Response,
+  next: NextFunction
+) {
+  // filter by inbox, draft, sent
+  // filter by done
+  try {
+    const { id: accountId } = req.params;
+    const {
+      tab = "inbox",
+      isDone = "inbox",
+      offset = 10,
+      page = 0,
+    } = req.query;
+    const { id: userId } = req.user!;
+
+    await getAccountAssociatedWithUser({
+      userId,
+      accountId,
+    });
+
+    const { sentThreads, totalCount, totalPages } = await getThreadsService(
+      accountId,
+      tab,
+      isDone,
+      +offset,
+      +page
+    );
+
+    const response = {
+      data: sentThreads,
+      meta: {
+        currentPage: page,
+        totalPages,
+        totalCount,
+      },
+    };
+    sendSuccessResponse(
+      res,
+      response,
+
+      HttpStatusCode.OK
+    );
+  } catch (e) {
+    next(e);
   }
 }

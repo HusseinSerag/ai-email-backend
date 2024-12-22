@@ -1,4 +1,4 @@
-import { CustomError, HttpStatusCode } from "../lib/customError";
+import { CustomError, HttpStatusCode } from "../helpers/customError";
 import { prisma } from "../lib/prismaClient";
 
 export async function getAccountAssociatedWithUser({

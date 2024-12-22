@@ -5,13 +5,13 @@ import {
   getAurinkoAuthURL,
 } from "../lib/aurinko";
 import { IRequest } from "../type";
-import { sendSuccessResponse } from "../lib/sendResponse";
-import { CustomError, HttpStatusCode } from "../lib/customError";
+import { sendSuccessResponse } from "../helpers/sendResponse";
+import { CustomError, HttpStatusCode } from "../helpers/customError";
 import { prisma } from "../lib/prismaClient";
-import log from "../lib/logger";
+import log from "../helpers/logger";
 import { syncEmailQueue } from "../lib/bullMQ";
 import crypto from "crypto";
-import { connectedUsers } from "../lib/socket";
+import { connectedUsers } from "../helpers/socket";
 
 export function getAurinkoUrl(
   req: IRequest,

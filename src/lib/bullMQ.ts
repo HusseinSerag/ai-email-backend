@@ -2,9 +2,9 @@ import { Job, Queue, Worker, QueueEvents } from "bullmq";
 
 import { Account } from "./account";
 import { prisma } from "./prismaClient";
-import log from "./logger";
+import log from "../helpers/logger";
 import { syncEmailsToDB } from "./syncToDB";
-import { connectedUsers } from "./socket";
+import { connectedUsers } from "../helpers/socket";
 import { io } from "../main";
 
 export const syncEmailQueue = new Queue("email-sync", {

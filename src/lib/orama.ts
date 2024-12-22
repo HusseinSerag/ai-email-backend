@@ -1,6 +1,6 @@
 import { create, insert, search, type AnyOrama } from "@orama/orama";
 import { prisma } from "./prismaClient";
-import { CustomError, HttpStatusCode } from "./customError";
+import { CustomError, HttpStatusCode } from "../helpers/customError";
 import { persist, restore } from "@orama/plugin-data-persistence";
 import { generateEmbeddings } from "./analyzeEmail";
 

@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { CustomError, HttpStatusCode } from "../lib/customError";
+import { CustomError, HttpStatusCode } from "../helpers/customError";
 import { Webhook } from "svix";
-import { sendSuccessResponse } from "../lib/sendResponse";
+import { sendSuccessResponse } from "../helpers/sendResponse";
 import { prisma } from "../lib/prismaClient";
-import log from "../lib/logger";
+import log from "../helpers/logger";
+import { clerkWebhookService } from "../services/clerk.service";
 
 export async function handleUserCreationWebhook(
   req: Request,
@@ -24,17 +25,7 @@ export async function handleUserCreationWebhook(
       return new CustomError("Missing svix error", HttpStatusCode.BAD_REQUEST);
     }
 
-    const data = req.body.data;
-    const { first_name, last_name, image_url, email_addresses, id } = data;
-    await prisma.user.create({
-      data: {
-        firstName: first_name ?? email_addresses[0].email_address,
-        email: email_addresses[0].email_address,
-        lastName: last_name ?? email_addresses[0].email_address,
-        imageUrl: image_url,
-        id: id,
-      },
-    });
+    await clerkWebhookService(req.body.data);
     log.info("User created!");
     sendSuccessResponse(
       res,

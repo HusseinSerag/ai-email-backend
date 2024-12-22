@@ -1,7 +1,7 @@
 import { AWSError, S3 } from "aws-sdk";
 import { PutObjectOutput } from "aws-sdk/clients/s3";
 
-import log from "./logger";
+import log from "../helpers/logger";
 import fs from "fs";
 import path from "path";
 interface FileShape {

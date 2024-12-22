@@ -11,7 +11,7 @@ import http from "http";
 import { setupSocketIO } from "./lib/setupSocketIO";
 
 import { validateNotification } from "./routes/webhook";
-import log from "./lib/logger";
+import log from "./helpers/logger";
 const app = express();
 const server = http.createServer(app);
 export const io = setupSocketIO(server);
@@ -50,6 +50,7 @@ app.post(
   validateNotification
 );
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(clerkMiddleware());
 
