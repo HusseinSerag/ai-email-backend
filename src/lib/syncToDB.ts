@@ -3,13 +3,14 @@ import log from "../helpers/logger";
 import p from "p-limit";
 import { prisma } from "./prismaClient";
 import { CustomError, HttpStatusCode } from "../helpers/customError";
-import { eventQueue } from "./bullMQ";
+
 import axios from "axios";
 import { UploadToS3, getS3Url } from "./s3";
 import { OramaClient } from "./orama";
 
 import { turndown } from "../helpers/turndown";
 import { generateEmbeddings } from "../helpers/analyzeEmail";
+import { eventQueue } from "../background/queues";
 
 export async function syncEmailsToDB(
   emails: EmailMessage[],

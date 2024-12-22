@@ -16,7 +16,10 @@ import { Account } from "../lib/account";
 import { uploadFilesService } from "../helpers/uploadFileService";
 import { SendEmailBody } from "../validation/email";
 import { AccountId } from "./../validation/account";
-import { sendEmailService } from "../services/emails.service";
+import {
+  getEmailsAssociatedWithAccountService,
+  sendEmailService,
+} from "../services/emails.service";
 import { syncEmailQueue } from "../background/queues";
 
 export function getAurinkoUrl(
@@ -161,5 +164,19 @@ export async function onboardEmail(
   } catch (e) {
     log.error(e);
     res.redirect(`${frontend}/error?message=${(e as Error).message}`);
+  }
+}
+
+export async function getSuggestions(
+  req: IRequest<AccountId>,
+  res: Response,
+  next: NextFunction
+) {
+  const { id } = req.params;
+  try {
+    const suggestions = await getEmailsAssociatedWithAccountService(id);
+    sendSuccessResponse(res, suggestions, HttpStatusCode.OK);
+  } catch (e) {
+    next(e);
   }
 }
