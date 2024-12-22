@@ -115,7 +115,7 @@ export async function getThreadsAccount(
     {},
     {},
     {
-      tab: "inbox" | "sent" | "draft" | "starred";
+      tab: "inbox" | "sent" | "draft" | "starred" | "archived";
       isDone: "true" | "false";
       page: number;
       offset: number;
@@ -139,12 +139,18 @@ export async function getThreadsAccount(
     let filter: Prisma.ThreadWhereInput = {};
     if (tab === "inbox") {
       filter.inboxStatus = true;
+      filter.archived = false;
     } else if (tab === "draft") {
       filter.draftStatus = true;
+      filter.archived = false;
     } else if (tab === "sent") {
       filter.sentStatus = true;
+      filter.archived = false;
     } else if (tab === "starred") {
       filter.starred = true;
+      filter.archived = false;
+    } else if (tab === "archived") {
+      filter.archived = true;
     }
     filter.done = {
       equals: isDone === "true" ? true : false,

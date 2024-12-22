@@ -49,6 +49,7 @@ model Thread {
   draftStatus     Boolean   @default(false)
   sentStatus      Boolean   @default(false)
   starred         Boolean   @default(false)
+  archived        Boolean   @default(false)
 
   emails          Email[]
 

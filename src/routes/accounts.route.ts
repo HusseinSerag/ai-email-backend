@@ -11,6 +11,7 @@ import { requireAuth } from "../middleware/requireAuth";
 import {
   getThread,
   getThreadInformation,
+  toggleArchiveThread,
   toggleStarThread,
 } from "../controllers/threads.controller";
 import multer, { memoryStorage } from "multer";
@@ -27,6 +28,7 @@ router.get("/thread/:id/:threadId", requireAuth, getThreadInformation);
 router.get("/get-thread/:id/:threadId", requireAuth, getThread);
 router.get("/search/:id", requireAuth, searchThreads);
 router.patch("/thread/star/:id/:threadId", requireAuth, toggleStarThread);
+router.patch("/thread/archive/:id/:threadId", requireAuth, toggleArchiveThread);
 router.post(
   "/send/:id",
   requireAuth,
