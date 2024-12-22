@@ -21,6 +21,7 @@ import {
   sendEmailService,
 } from "../services/emails.service";
 import { syncEmailQueue } from "../background/queues";
+import { clerkClient } from "@clerk/express";
 
 export function getAurinkoUrl(
   req: IRequest,
@@ -95,6 +96,16 @@ export async function onboardEmail(
       });
       if (!user) {
         // create user and use the id
+        const user = await clerkClient.users.getUser(userId);
+        await prisma.user.create({
+          data: {
+            email: user.emailAddresses[0].emailAddress,
+            firstName: user.firstName ?? "",
+            imageUrl: user.imageUrl,
+            lastName: user.lastName ?? "",
+            id: userId,
+          },
+        });
       }
       // if user already have an account with the same address dont create anything
       const account = await prisma.account.findUnique({
