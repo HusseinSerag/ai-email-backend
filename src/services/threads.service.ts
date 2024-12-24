@@ -394,9 +394,6 @@ export async function toggleReadService(threadId: string) {
     let unread: boolean = true;
     if (unreadEmails.length > 0) {
       unread = false;
-      const unreadEmails = thread.emails.filter((email) =>
-        email.sysLabels.includes("unread")
-      );
       await Promise.all(
         unreadEmails.map((unreadEmail) =>
           prisma.email.update({
@@ -415,6 +412,7 @@ export async function toggleReadService(threadId: string) {
       );
     } else if (readEmails.length > 0) {
       unread = true;
+
       await Promise.all(
         readEmails.map((readEmail) =>
           prisma.email.update({
@@ -422,7 +420,7 @@ export async function toggleReadService(threadId: string) {
               id: readEmail.id,
             },
             data: {
-              sysLabels: { push: "unread" },
+              sysLabels: { set: [...readEmail.sysLabels, "unread"] },
             },
           })
         )

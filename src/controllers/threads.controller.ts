@@ -248,6 +248,6 @@ export async function toggleReadForThreadMails(
       HttpStatusCode.OK
     );
   } catch (e) {
-    throw e;
+    next(e);
   }
 }
