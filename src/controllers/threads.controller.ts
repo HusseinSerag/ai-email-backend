@@ -10,6 +10,7 @@ import {
   getThreadService,
   searchThreadService,
   toggleArchiveService,
+  toggleReadService,
   toggleStarService,
 } from "../services/threads.service";
 
@@ -168,6 +169,10 @@ export async function threadStatsController(
         inbox: stats[1],
         sent: stats[2],
         starred: stats[3],
+        social: stats[4],
+        updates: stats[5],
+        personal: stats[6],
+        promotions: stats[7],
       },
       HttpStatusCode.OK
     );
@@ -185,12 +190,7 @@ export async function getThreadsController(
   // filter by done
   try {
     const { id: accountId } = req.params;
-    const {
-      tab = "inbox",
-      isDone = "inbox",
-      offset = 10,
-      page = 0,
-    } = req.query;
+    const { tab = "inbox", unread = "all", offset = 10, page = 0 } = req.query;
     const { id: userId } = req.user!;
 
     await getAccountAssociatedWithUser({
@@ -201,7 +201,7 @@ export async function getThreadsController(
     const { sentThreads, totalCount, totalPages } = await getThreadsService(
       accountId,
       tab,
-      isDone,
+      unread,
       +offset,
       +page
     );
@@ -222,5 +222,32 @@ export async function getThreadsController(
     );
   } catch (e) {
     next(e);
+  }
+}
+
+export async function toggleReadForThreadMails(
+  req: IRequest<RequireAccountAndThreadId["params"]>,
+  res: Response,
+  next: NextFunction
+) {
+  const { id: accountId, threadId } = req.params;
+  const { id: userId } = req.user!;
+  try {
+    const account = await getAccountAssociatedWithUser({
+      accountId,
+      userId,
+    });
+
+    const unread = await toggleReadService(threadId);
+
+    sendSuccessResponse(
+      res,
+      {
+        unread: unread,
+      },
+      HttpStatusCode.OK
+    );
+  } catch (e) {
+    throw e;
   }
 }

@@ -5,7 +5,7 @@ import crypto from "crypto";
 import log from "../helpers/logger";
 import { prisma } from "../lib/prismaClient";
 import { Account } from "../lib/account";
-export async function validateNotification(
+export async function syncEmailWebhook(
   req: IRequest<
     unknown,
     unknown,

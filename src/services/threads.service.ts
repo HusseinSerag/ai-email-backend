@@ -3,7 +3,7 @@ import { prisma } from "../lib/prismaClient";
 import { getS3Url } from "../lib/s3";
 
 import { OramaClient } from "../lib/orama";
-import { Done, Tab } from "../validation/threads";
+import { Unread, Tab } from "../validation/threads";
 import { CustomError, HttpStatusCode } from "../helpers/customError";
 
 export async function threadStatsService(accountId: string) {
@@ -33,6 +33,54 @@ export async function threadStatsService(accountId: string) {
           starred: true,
         },
       }),
+      prisma.email.count({
+        where: {
+          thread: {
+            accountId,
+          },
+          AND: {
+            sysClassifications: {
+              has: "social",
+            },
+          },
+        },
+      }),
+      prisma.email.count({
+        where: {
+          thread: {
+            accountId,
+          },
+          AND: {
+            sysClassifications: {
+              has: "updates",
+            },
+          },
+        },
+      }),
+      prisma.email.count({
+        where: {
+          thread: {
+            accountId,
+          },
+          AND: {
+            sysClassifications: {
+              has: "personal",
+            },
+          },
+        },
+      }),
+      prisma.email.count({
+        where: {
+          thread: {
+            accountId,
+          },
+          AND: {
+            sysClassifications: {
+              has: "promotions",
+            },
+          },
+        },
+      }),
     ]);
   } catch (e) {
     throw e;
@@ -42,7 +90,7 @@ export async function threadStatsService(accountId: string) {
 export async function getThreadsService(
   accountId: string,
   tab: Tab,
-  isDone: Done,
+  unread: Unread,
   offset: number,
   page: number
 ) {
@@ -61,10 +109,36 @@ export async function getThreadsService(
     filter.archived = false;
   } else if (tab === "archived") {
     filter.archived = true;
+  } else if (
+    tab === "updates" ||
+    tab === "personal" ||
+    tab === "promotions" ||
+    tab === "social"
+  ) {
+    filter = {
+      emails: {
+        some: {
+          sysClassifications: {
+            has: tab,
+          },
+        },
+      },
+    };
   }
-  filter.done = {
-    equals: isDone === "done",
-  };
+
+  if (unread === "unread") {
+    filter = {
+      ...filter,
+      emails: {
+        some: {
+          sysLabels: {
+            has: "unread",
+          },
+        },
+      },
+    };
+  }
+
   filter.accountId = accountId;
   const threads = await prisma.thread.findMany({
     where: filter,
@@ -99,16 +173,6 @@ export async function getThreadsService(
 
   let sentThreads = threads.filter((thread) => thread.emails.length > 0);
 
-  sentThreads.forEach((threads) =>
-    threads.emails.forEach((email) =>
-      email.attachments.forEach((attachment) => {
-        if (attachment.contentId?.startsWith("uploads/")) {
-          attachment.contentLocation = getS3Url(attachment.contentId);
-        }
-      })
-    )
-  );
-
   const totalCount = await prisma.thread.count({ where: filter });
   const totalPages = Math.ceil(totalCount / offset);
 
@@ -126,7 +190,20 @@ export async function searchThreadService(accountId: string, query: string) {
     const resp = await orama.search({
       term: query,
     });
-    return resp.hits.map((hit) => hit.document);
+    const res = resp.hits.map((hit) => hit.document);
+    const threads = await Promise.all(
+      res.map((thread) =>
+        prisma.thread.findUnique({
+          where: {
+            id: thread.threadId,
+          },
+          include: {
+            emails: true,
+          },
+        })
+      )
+    );
+    return threads;
   } catch (e) {
     throw e;
   }
@@ -162,6 +239,14 @@ export async function getThreadService(accountId: string, threadId: string) {
 
     if (!thread)
       throw new CustomError("Thread doesn't exist", HttpStatusCode.NOT_FOUND);
+
+    thread.emails.forEach((email) =>
+      email.attachments.forEach((attachment) => {
+        if (attachment.contentId?.startsWith("uploads/")) {
+          attachment.contentLocation = getS3Url(attachment.contentId);
+        }
+      })
+    );
     return thread;
   } catch (e) {
     throw e;
@@ -277,6 +362,73 @@ export async function getThreadInfoService(
       references: lastExternalEmail.references,
     };
     return valueReturned;
+  } catch (e) {
+    throw e;
+  }
+}
+
+export async function toggleReadService(threadId: string) {
+  try {
+    const thread = await prisma.thread.findUnique({
+      where: {
+        id: threadId,
+      },
+      select: {
+        emails: {
+          select: {
+            id: true,
+            sysLabels: true,
+          },
+        },
+      },
+    });
+    if (!thread)
+      throw new CustomError("Thread doesnt exist", HttpStatusCode.NOT_FOUND);
+
+    const unreadEmails = thread.emails.filter((email) =>
+      email.sysLabels.includes("unread")
+    );
+    const readEmails = thread.emails.filter(
+      (email) => !email.sysLabels.includes("unread")
+    );
+    let unread: boolean = true;
+    if (unreadEmails.length > 0) {
+      unread = false;
+      const unreadEmails = thread.emails.filter((email) =>
+        email.sysLabels.includes("unread")
+      );
+      await Promise.all(
+        unreadEmails.map((unreadEmail) =>
+          prisma.email.update({
+            where: {
+              id: unreadEmail.id,
+            },
+            data: {
+              sysLabels: {
+                set: unreadEmail.sysLabels.filter(
+                  (label) => label !== "unread"
+                ),
+              },
+            },
+          })
+        )
+      );
+    } else if (readEmails.length > 0) {
+      unread = true;
+      await Promise.all(
+        readEmails.map((readEmail) =>
+          prisma.email.update({
+            where: {
+              id: readEmail.id,
+            },
+            data: {
+              sysLabels: { push: "unread" },
+            },
+          })
+        )
+      );
+    }
+    return unread;
   } catch (e) {
     throw e;
   }

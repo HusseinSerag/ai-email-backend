@@ -16,7 +16,22 @@ model User {
   lastName  String
   imageUrl  String?
   account   Account[] @relation("UserAccounts")
+  subscription Subscription?
 }
+
+model Subscription {
+  id  String   @id @default(uuid())
+  subscriptionTier  SubscriptionTier  @default(free)
+  userId String  @unique // relation scalar field (used in the `@relation` attribute above)
+  user   User @relation(fields: [userId], references: [id])
+  subscribedAt DateTime
+  numberOfMessagesSent Int @default(0)
+  firstMessageSentTime DateTime
+  numberOfAccounts Int @default(0) 
+  
+}
+
+
 
 model Account {
   id           String         @id @default(uuid())
@@ -150,6 +165,11 @@ enum MeetingMessageMethod {
   cancel
   counter
   other
+}
+
+enum SubscriptionTier {
+  free
+  pro
 }
 
 

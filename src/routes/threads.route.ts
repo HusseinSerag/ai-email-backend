@@ -9,6 +9,7 @@ import {
   getThreadController,
   toggleStarController,
   toggleArchiveController,
+  toggleReadForThreadMails,
 } from "../controllers/threads.controller";
 import validate from "../middleware/validate";
 import { RequireAccountId } from "../validation/account";
@@ -61,6 +62,13 @@ router.patch(
   requireAuth,
   validate(requireAccountAndThreadId),
   toggleArchiveController
+);
+
+router.patch(
+  "/read/:id/:threadId",
+  requireAuth,
+  validate(requireAccountAndThreadId),
+  toggleReadForThreadMails
 );
 
 export default router;

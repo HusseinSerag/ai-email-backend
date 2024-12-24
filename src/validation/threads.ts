@@ -13,15 +13,19 @@ export const TabSchema = z.union([
   z.literal("draft"),
   z.literal("starred"),
   z.literal("archived"),
+  z.literal("social"),
+  z.literal("updates"),
+  z.literal("personal"),
+  z.literal("promotions"),
 ]);
-export const DoneSchema = z.union([z.literal("inbox"), z.literal("done")]);
+export const UnreadSchema = z.union([z.literal("all"), z.literal("unread")]);
 export const getThreadsSchema = z.object({
   params: accountId,
   query: z.object({
     page: z.coerce.number().default(0),
     offset: z.coerce.number().default(10),
     tab: TabSchema.default("inbox"),
-    isDone: DoneSchema.default("inbox"),
+    unread: UnreadSchema.default("all"),
   }),
 });
 
@@ -36,5 +40,5 @@ export type RequireAccountAndThreadId = z.infer<
 >;
 export type GetThreads = z.infer<typeof getThreadsSchema>;
 export type Tab = z.infer<typeof TabSchema>;
-export type Done = z.infer<typeof DoneSchema>;
+export type Unread = z.infer<typeof UnreadSchema>;
 export type searchThread = z.infer<typeof searchThreadSchema>;

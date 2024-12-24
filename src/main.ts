@@ -10,7 +10,7 @@ import { routes } from "./routes/routes";
 import http from "http";
 import { setupSocketIO } from "./lib/setupSocketIO";
 
-import { validateNotification } from "./controllers/aurinkoWebhook";
+import { syncEmailWebhook } from "./controllers/aurinkoWebhook";
 import log from "./helpers/logger";
 const app = express();
 const server = http.createServer(app);
@@ -47,7 +47,7 @@ app.use(
 app.post(
   "/api/aurinko/webhook",
   express.raw({ type: "*/*" }),
-  validateNotification
+  syncEmailWebhook
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
