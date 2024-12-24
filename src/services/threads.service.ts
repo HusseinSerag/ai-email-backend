@@ -127,15 +127,8 @@ export async function getThreadsService(
   }
 
   if (unread === "unread") {
-    filter = {
-      ...filter,
-      emails: {
-        some: {
-          sysLabels: {
-            has: "unread",
-          },
-        },
-      },
+    filter.emails!.some!.sysLabels = {
+      has: "unread",
     };
   }
 
@@ -160,6 +153,7 @@ export async function getThreadsService(
           replyTo: true,
           cc: true,
           attachments: true,
+          sysClassifications: true,
         },
       },
     },

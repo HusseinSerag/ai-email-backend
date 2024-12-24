@@ -7,8 +7,7 @@ export async function stripeWebhookResponse(
   res: Response,
   next: NextFunction
 ) {
-  const endpointSecret =
-    "whsec_b934beccd1878839d6a03c67c2ad19188ab43456331c53ca28e4fe9ec04fa861";
+  const endpointSecret = process.env.STRIPE_ENV_SECRET as string;
 
   const sig = req.headers["stripe-signature"]!;
 
