@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import { payment } from "../lib/payment";
 import Stripe from "stripe";
+import log from "../helpers/logger";
 
 export async function stripeWebhookResponse(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
-  const endpointSecret = process.env.STRIPE_ENV_SECRET as string;
+  const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET as string;
 
   const sig = req.headers["stripe-signature"]!;
 
@@ -19,7 +20,10 @@ export async function stripeWebhookResponse(
       sig,
       endpointSecret
     );
+
+    console.log(req.body);
   } catch (err) {
+    log.error(err);
     res.status(400).send(`Webhook Error: ${(err as Error).message}`);
     return;
   }

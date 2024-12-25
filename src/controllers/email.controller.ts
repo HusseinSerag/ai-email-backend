@@ -106,6 +106,7 @@ export async function onboardEmail(
             id: userId,
           },
         });
+        userId = user.id;
       }
       // if user already have an account with the same address dont create anything
       const account = await prisma.account.findUnique({
@@ -128,6 +129,7 @@ export async function onboardEmail(
           emailAddress: email,
         },
       });
+      log.info("Found account", foundAcc?.emailAddress);
       if (foundAcc) {
         await prisma.account.update({
           where: {
@@ -158,6 +160,7 @@ export async function onboardEmail(
         });
         const customId = crypto.randomUUID().toString();
 
+        log.info("Syncing emails for account", account.id);
         syncEmailQueue.add(
           "sync",
           {

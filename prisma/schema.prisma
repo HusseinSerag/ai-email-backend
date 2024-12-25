@@ -21,13 +21,20 @@ model User {
 
 model Subscription {
   id  String   @id @default(uuid())
-  subscriptionTier  SubscriptionTier  @default(free)
   userId String  @unique // relation scalar field (used in the `@relation` attribute above)
   user   User @relation(fields: [userId], references: [id])
-  subscribedAt DateTime
-  numberOfMessagesSent Int @default(0)
-  firstMessageSentTime DateTime
-  numberOfAccounts Int @default(0) 
+  createdAt DateTime @default(now())
+
+  customerId String
+  subscriptionId String
+  priceId String
+
+ 
+  currentPeriodEnd DateTime
+  updatedAt DateTime @updatedAt
+
+  
+  
   
 }
 
@@ -171,7 +178,6 @@ enum SubscriptionTier {
   free
   pro
 }
-
 
 
 

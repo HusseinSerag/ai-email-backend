@@ -127,9 +127,10 @@ export async function getThreadsService(
   }
 
   if (unread === "unread") {
-    filter.emails!.some!.sysLabels = {
-      has: "unread",
-    };
+    if (filter.emails && filter.emails.some)
+      filter.emails.some.sysLabels = {
+        has: "unread",
+      };
   }
 
   filter.accountId = accountId;

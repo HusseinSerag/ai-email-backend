@@ -12,6 +12,7 @@ import { setupSocketIO } from "./lib/setupSocketIO";
 
 import { syncEmailWebhook } from "./controllers/aurinkoWebhook";
 import log from "./helpers/logger";
+import { stripeWebhookResponse } from "./controllers/stripeWebhook";
 const app = express();
 const server = http.createServer(app);
 export const io = setupSocketIO(server);
@@ -48,6 +49,11 @@ app.post(
   "/api/aurinko/webhook",
   express.raw({ type: "*/*" }),
   syncEmailWebhook
+);
+app.post(
+  "/stripe",
+  express.raw({ type: "application/json" }),
+  stripeWebhookResponse
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
