@@ -129,7 +129,7 @@ export async function onboardEmail(
           emailAddress: email,
         },
       });
-      log.info("Found account", foundAcc?.emailAddress);
+      log.info("Found account", foundAcc);
       if (foundAcc) {
         await prisma.account.update({
           where: {

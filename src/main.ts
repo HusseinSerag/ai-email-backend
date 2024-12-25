@@ -13,6 +13,7 @@ import { setupSocketIO } from "./lib/setupSocketIO";
 import { syncEmailWebhook } from "./controllers/aurinkoWebhook";
 import log from "./helpers/logger";
 import { stripeWebhookResponse } from "./controllers/stripeWebhook";
+import "./background";
 const app = express();
 const server = http.createServer(app);
 export const io = setupSocketIO(server);

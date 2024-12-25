@@ -1,10 +1,10 @@
 import { Job, Worker } from "bullmq";
-
 import log from "../helpers/logger";
 import { prisma } from "../lib/prismaClient";
 import { Account } from "../lib/account";
 import { syncEmailsToDB } from "../lib/syncToDB";
 import { connection } from "./queues";
+log.info("Worker started");
 export const worker = new Worker(
   "email-sync",
   async (job: Job) => {
