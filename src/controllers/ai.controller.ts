@@ -15,7 +15,7 @@ export async function generateAIemail(
 ) {
   try {
     const { context, prompt } = req.body;
-    res.setHeader("Transfer-Encoding", "chunked");
+    // res.setHeader("Transfer-Encoding", "chunked");
     res.setHeader("Content-Type", "text/plain");
     res.setHeader("Cache-Control", "no-cache");
 
@@ -42,7 +42,7 @@ export async function generateChat(
   try {
     const { messages } = req.body;
     const { id: accountId } = req.params;
-    res.setHeader("Transfer-Encoding", "chunked");
+    //res.setHeader("Transfer-Encoding", "chunked");
     res.setHeader("Content-Type", "text/plain");
     res.setHeader("Cache-Control", "no-cache");
 
