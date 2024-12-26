@@ -15,3 +15,12 @@ export async function createCheckoutSessionService(userId: string) {
     throw e;
   }
 }
+
+export async function getSubscriptionDetailsService(userId: string) {
+  try {
+    const subscriptionDetails = await payment.getSubscriptionDetails(userId);
+    return subscriptionDetails;
+  } catch (e) {
+    throw e;
+  }
+}

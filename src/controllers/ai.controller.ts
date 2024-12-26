@@ -16,7 +16,9 @@ export async function generateAIemail(
   try {
     const { context, prompt } = req.body;
     res.setHeader("Transfer-Encoding", "chunked");
-    res.flushHeaders();
+    //  res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+
     const stream = await generateEmail(context, prompt);
     for await (const part of stream) {
       if (part.choices[0].finish_reason === "stop") {
@@ -25,6 +27,7 @@ export async function generateAIemail(
       }
 
       res.write(part.choices[0].delta.content);
+      res.flush();
     }
   } catch (e) {
     next(e);
@@ -40,7 +43,9 @@ export async function generateChat(
     const { messages } = req.body;
     const { id: accountId } = req.params;
     res.setHeader("Transfer-Encoding", "chunked");
-    res.flushHeaders();
+    // res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+
     const content = messages[messages.length - 1].content;
     const searchResults = await performVectorSearch(content, accountId);
     const context = await generateContext(searchResults);
@@ -51,6 +56,7 @@ export async function generateChat(
         return;
       }
       res.write(part.choices[0].delta.content);
+      res.flush();
     }
   } catch (e) {
     next(e);

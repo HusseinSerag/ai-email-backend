@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { CustomError, HttpStatusCode } from "../helpers/customError";
+import { prisma } from "./prismaClient";
 
 export class Payment {
   private api?: Stripe;
@@ -30,12 +31,30 @@ export class Payment {
             },
           ],
           mode: "subscription",
-          success_url: `${process.env.CLIENT_URL}/success`,
+          success_url: `${process.env.CLIENT_URL}/mail`,
           cancel_url: `${process.env.CLIENT_URL}/mail`,
           client_reference_id: userId,
         });
         return checkoutUrl?.url;
       }
+    } else {
+      throw new CustomError(
+        "payment provider not initialized!",
+        HttpStatusCode.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+  async getSubscriptionDetails(userId: string) {
+    if (this.initialized) {
+      const subscription = await prisma.subscription.findUnique({
+        where: {
+          userId,
+        },
+      });
+      if (!subscription) {
+        return null;
+      }
+      return subscription;
     } else {
       throw new CustomError(
         "payment provider not initialized!",

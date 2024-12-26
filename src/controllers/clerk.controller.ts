@@ -5,6 +5,7 @@ import { sendSuccessResponse } from "../helpers/sendResponse";
 
 import log from "../helpers/logger";
 import { clerkWebhookService } from "../services/clerk.service";
+import { IRequest } from "../type";
 
 export async function handleUserCreationWebhook(
   req: Request,

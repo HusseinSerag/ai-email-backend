@@ -14,7 +14,9 @@ import { syncEmailWebhook } from "./controllers/aurinkoWebhook";
 import log from "./helpers/logger";
 import { stripeWebhookResponse } from "./controllers/stripeWebhook";
 import "./background";
+import compression from "compression";
 const app = express();
+app.use(compression());
 const server = http.createServer(app);
 export const io = setupSocketIO(server);
 
@@ -46,6 +48,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.post(
   "/api/aurinko/webhook",
   express.raw({ type: "*/*" }),

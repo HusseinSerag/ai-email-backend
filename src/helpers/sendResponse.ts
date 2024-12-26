@@ -14,7 +14,7 @@ export function sendErrorResponse(
 
 export function sendSuccessResponse(
   res: Response,
-  data: Object,
+  data: Object | null,
   code: HttpStatusCode
 ) {
   res.status(code).json({
