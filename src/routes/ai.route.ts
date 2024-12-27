@@ -1,6 +1,10 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/requireAuth";
-import { generateAIemail, generateChat } from "../controllers/ai.controller";
+import {
+  generateAIemail,
+  generateChat,
+  getChatbotInteractionsController,
+} from "../controllers/ai.controller";
 import validate from "../middleware/validate";
 import { GenerateChatSchema, generateAIEmailSchema } from "../validation/ai";
 
@@ -17,4 +21,5 @@ router.post(
   validate(GenerateChatSchema),
   generateChat
 );
+router.get("/interactions", requireAuth, getChatbotInteractionsController);
 export default router;

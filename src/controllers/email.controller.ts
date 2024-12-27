@@ -23,13 +23,17 @@ import {
 import { syncEmailQueue } from "../background/queues";
 import { clerkClient } from "@clerk/express";
 
-export function getAurinkoUrl(
+export async function getAurinkoUrl(
   req: IRequest,
   res: Response,
   next: NextFunction
 ) {
-  const url = getAurinkoAuthURL("Google", req.user!.id);
-  sendSuccessResponse(res, url, HttpStatusCode.OK);
+  try {
+    const url = await getAurinkoAuthURL("Google", req.user!.id, req.user!.id);
+    sendSuccessResponse(res, url, HttpStatusCode.OK);
+  } catch (e) {
+    next(e);
+  }
 }
 
 export async function sendEmailController(

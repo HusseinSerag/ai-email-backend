@@ -6,10 +6,14 @@ export enum HttpStatusCode {
   FORBIDDEN = 403,
   NOT_FOUND = 404,
   INTERNAL_SERVER_ERROR = 500,
+  PAYMENT_REQUIRED = 402,
 }
 
 export class CustomError extends Error {
-  constructor(message: string, public code: HttpStatusCode) {
+  constructor(
+    message: string,
+    public code: HttpStatusCode
+  ) {
     super(message);
   }
 }

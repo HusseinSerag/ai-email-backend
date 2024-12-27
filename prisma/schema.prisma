@@ -17,8 +17,17 @@ model User {
   imageUrl  String?
   account   Account[] @relation("UserAccounts")
   subscription Subscription?
+  chatbotInteraction ChatbotInteraction?
 }
 
+model ChatbotInteraction {
+  id String @id @default(uuid())
+  count Int @default(1)
+  firstInteraction DateTime @default(now())
+  userId String  @unique 
+  user   User @relation(fields: [userId], references: [id])
+
+}
 model Subscription {
   id  String   @id @default(uuid())
   userId String  @unique // relation scalar field (used in the `@relation` attribute above)

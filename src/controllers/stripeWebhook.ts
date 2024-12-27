@@ -108,7 +108,12 @@ export async function stripeWebhookResponse(
       const subscription = await api.subscriptions.retrieve(
         session.id as string
       );
-
+      const existingSubscription = await prisma.subscription.findUnique({
+        where: { subscriptionId: session.id },
+      });
+      if (!existingSubscription) {
+        throw new CustomError("Subscription not found", HttpStatusCode.OK);
+      }
       await prisma.subscription.update({
         where: {
           subscriptionId: session.id,

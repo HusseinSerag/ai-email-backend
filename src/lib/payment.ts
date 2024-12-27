@@ -44,6 +44,29 @@ export class Payment {
       );
     }
   }
+  async billing(userId: string) {
+    if (this.initialized) {
+      const subscription = await prisma.subscription.findUnique({
+        where: { userId },
+      });
+      if (!subscription) {
+        return "";
+      }
+      if (this.provider === "stripe") {
+        const billingURL = await this.api?.billingPortal.sessions.create({
+          customer: subscription.customerId,
+
+          return_url: `${process.env.CLIENT_URL}/mail`,
+        });
+        return billingURL?.url;
+      }
+    } else {
+      throw new CustomError(
+        "payment provider not initialized!",
+        HttpStatusCode.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
   async getSubscriptionDetails(userId: string) {
     if (this.initialized) {
       const subscription = await prisma.subscription.findUnique({

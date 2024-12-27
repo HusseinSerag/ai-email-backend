@@ -3,6 +3,7 @@ import { turndown } from "../helpers/turndown";
 import { search } from "@orama/orama";
 import { Message } from "../validation/ai";
 import { OramaClient } from "../lib/orama";
+import { prisma } from "../lib/prismaClient";
 export async function generateEmail(context: string, prompt: string) {
   try {
     const stream = await openAi.chat.completions.create(
@@ -119,6 +120,47 @@ export async function performVectorSearch(content: string, accountId: string) {
       term: content,
     });
     return searchResults;
+  } catch (e) {
+    throw e;
+  }
+}
+
+export async function getChatbotInteractionsService(userId: string) {
+  try {
+    const interaction = await prisma.chatbotInteraction.findUnique({
+      where: {
+        userId,
+      },
+    });
+    return interaction;
+  } catch (e) {
+    throw e;
+  }
+}
+
+export async function updateInteraction(userId: string) {
+  try {
+    const chatBotInteraction = await prisma.chatbotInteraction.findUnique({
+      where: {
+        userId,
+      },
+    });
+    if (!chatBotInteraction) {
+      await prisma.chatbotInteraction.create({
+        data: {
+          userId,
+        },
+      });
+      return;
+    }
+    await prisma.chatbotInteraction.update({
+      where: {
+        userId,
+      },
+      data: {
+        count: chatBotInteraction.count + 1,
+      },
+    });
   } catch (e) {
     throw e;
   }
