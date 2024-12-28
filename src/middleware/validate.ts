@@ -15,8 +15,8 @@ export default function validate(schema: ZodSchema) {
         params: req.params,
         query: req.query,
       });
-      console.log(result.error);
       if (result.error) {
+        console.error(result.error);
         const errorMessage = (
           JSON.parse(result.error.message) as [
             {
