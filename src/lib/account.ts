@@ -125,7 +125,7 @@ export class Account {
 
       log.info("Email sent!");
     } catch (e) {
-      console.log(e);
+      log.error(e);
       if (isAxiosError(e)) {
         log.error(e.cause);
         log.error(e.message);
